@@ -1,6 +1,6 @@
 import openai
 import streamlit as st
-openai.api_key=st.secrets["openai_api_key"]
+client = openai(api_key=st.secrets["OPENAI_API_KEY"])
 
 if "openai_model" not in st.session_state:
     st.session_state["openai_model"] = "gpt-3.5-turbo"
