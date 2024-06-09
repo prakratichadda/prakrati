@@ -1,19 +1,34 @@
+import openai
 import streamlit as st
+openai.api_key=st.secrets["openai_api_key"]
 
-# Function to generate AI response
-def get_ai_response(user_input):
-    # Here you would integrate your AI model to generate a response based on user input
-    # For demonstration purposes, let's just echo the user's input as the AI response
-    return user_input
+if "openai_model" not in st.session_state:
+    st.session_state["openai_model"] = "gpt-3.5-turbo"
 
-# Streamlit UI
-def main():
-    st.title("Chat with AI")
+# Initialize chat history
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
-    user_input = st.text_input("User input:")
-    if st.button("Send"):
-        ai_response = get_ai_response(user_input)
-        st.text("AI response: {}".format(ai_response))
+# Display chat messages from history on app rerun
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
-if __name__ == "__main__":
-    main()
+# Accept user input
+if prompt := st.chat_input("What is up?"):
+    # Add user message to chat history
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    # Display user message in chat message container
+    with st.chat_message("user"):
+        st.markdown(prompt)
+    with st.chat_message("assistant"):
+        stream = client.chat.completions.create(
+            model=st.session_state["openai_model"],
+            messages=[
+                {"role": m["role"], "content": m["content"]}
+                for m in st.session_state.messages
+            ],
+            stream=True,
+        )
+        response = st.write_stream(stream)
+    st.session_state.messages.append({"role": "assistant", "content": response})
